@@ -58,7 +58,7 @@ st.sidebar.markdown("""
 
 st.sidebar.header("RAD Measurement Protocol")
 cycle_time = st.sidebar.number_input("Cycle Time (min)", min_value=1, value=15) * 60
-simtime = st.sidebar.number_input("Simulation Time (min)", min_value=1, value=180) * 60
+simtime = st.sidebar.number_input("Measurement Time (min)", min_value=1, value=180) * 60
 mode = st.sidebar.radio("Mode", ["Sniff", "Normal"])
 
 
