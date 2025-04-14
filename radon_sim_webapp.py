@@ -51,7 +51,7 @@ simtime = st.sidebar.number_input("Simulation Time (min)", min_value=1, value=18
 mode = st.sidebar.radio("Mode", ["Sniff", "Normal"])
 
 st.sidebar.header("Simulated Progeny Counts")
-show_po218 = st.sidebar.checkbox("Show Po218", value=True)
+show_po218 = st.sidebar.checkbox("Show Po218", value=False)
 show_po214 = st.sidebar.checkbox("Show Po214", value=False)
 
 st.sidebar.markdown("---")
