@@ -45,15 +45,6 @@ st.sidebar.header("Radon Sample Measured")
 Rn222_CONC = st.sidebar.number_input("Rn 222 (Bq/m³)", min_value=0, value=200)
 source = st.sidebar.radio("Constant Radon Source", ["On", "Off"]) == "On"
 
-st.sidebar.header("RAD Measurement Protocol")
-cycle_time = st.sidebar.number_input("Cycle Time (min)", min_value=1, value=15) * 60
-simtime = st.sidebar.number_input("Simulation Time (min)", min_value=1, value=180) * 60
-mode = st.sidebar.radio("Mode", ["Sniff", "Normal"])
-
-st.sidebar.header("Simulated Progeny Counts")
-show_po218 = st.sidebar.checkbox("Show Po218", value=False)
-show_po214 = st.sidebar.checkbox("Show Po214", value=False)
-
 st.sidebar.markdown("---")
 st.sidebar.subheader("Reference Levels")
 st.sidebar.markdown("""
@@ -63,6 +54,18 @@ st.sidebar.markdown("""
 - 🏠 **Stanley Watras’ Basement:** >100,000 Bq/m³  
 - 🧪 **Dark Matter Labs:** <0.001 Bq/m³  
 """)
+
+
+st.sidebar.header("RAD Measurement Protocol")
+cycle_time = st.sidebar.number_input("Cycle Time (min)", min_value=1, value=15) * 60
+simtime = st.sidebar.number_input("Simulation Time (min)", min_value=1, value=180) * 60
+mode = st.sidebar.radio("Mode", ["Sniff", "Normal"])
+
+
+
+st.sidebar.header("Simulated Progeny Counts")
+show_po218 = st.sidebar.checkbox("Show Po218", value=False)
+show_po214 = st.sidebar.checkbox("Show Po214", value=False)
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**Author:** Robert Renz Marcelo Gregorio  \n**Email:** rob@durridge.co.uk  \n**Year:** 2025 Version: Alpha")
