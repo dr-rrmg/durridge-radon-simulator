@@ -39,9 +39,8 @@ def RAD7_CONC_TO_N(ConcBq, decay_const):
 
 
 # --- Sidebar Sections ---
-st.sidebar.markdown("DURRIDGE Radon Measurement Simulator (Experimental Code Ver.)")
-st.sidebar.markdown("**Author:** Robert Renz Marcelo Gregorio  \n**Email:** rob@durridge.co.uk  \n**Year:** 2025  \n**Version:** Experimental Code")
-st.sidebar.markdown("---")
+st.sidebar.markdown("**DURRIDGE Radon Measurement Simulator (Experimental Code Ver.)**")
+
 
 with st.sidebar.expander("⚛️ Radon Sample", expanded=True):
     Rn222_CONC = st.number_input("Rn 222 (Bq/m³)", min_value=0, value=200)
@@ -77,6 +76,9 @@ with st.sidebar.expander("📚 Reference Levels", expanded=True):
 with st.sidebar.expander("📟 Display Options"):
     show_po218 = st.checkbox("Show Po218", value=False)
     show_po214 = st.checkbox("Show Po214", value=False)
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("**Author:** Robert Renz Marcelo Gregorio  \n**Email:** rob@durridge.co.uk  \n**Year:** 2025  \n**Version:** Experimental Code")
 
 
 # --- Simulation ---
