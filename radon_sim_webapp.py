@@ -39,11 +39,14 @@ def RAD7_CONC_TO_N(ConcBq, decay_const):
 
 # --- Streamlit UI ---
 st.set_page_config(page_title="DURRIDGE Radon Measurement Simulator", layout="wide")
-st.title("DURRIDGE Radon Measurement Simulator - Proof of Concept")
+st.title("DURRIDGE Radon Measurement Simulator (Experimental Code Ver.)")
 
 # --- Sidebar Sections ---
-
-with st.sidebar.expander("🎯 Measurement Protocol"):
+with st.sidebar.expander("⚛️ Radon Sample", expanded=True):
+    Rn222_CONC = st.number_input("Rn 222 (Bq/m³)", min_value=0, value=200)
+    source = st.radio("Constant Source", ["On", "Off"]) == "On"
+    
+with st.sidebar.expander("🎯 Measurement Protocol", expanded=True):
     protocols = {
         "Sniff (3hr, 5min cycles)": {"cycle": 5, "time": 180, "mode": "Sniff"},
         "1-day (30min cycles)": {"cycle": 30, "time": 1440, "mode": "Auto"},
@@ -61,15 +64,7 @@ with st.sidebar.expander("🎯 Measurement Protocol"):
     **Mode:** {preset['mode']}
     """)
 
-with st.sidebar.expander("⚛️ Radon Sample"):
-    Rn222_CONC = st.number_input("Rn 222 (Bq/m³)", min_value=0, value=200)
-    source = st.radio("Constant Source", ["On", "Off"]) == "On"
-
-with st.sidebar.expander("📟 Display Options"):
-    show_po218 = st.checkbox("Show Po218", value=False)
-    show_po214 = st.checkbox("Show Po214", value=False)
-
-with st.sidebar.expander("📚 Reference Levels"):
+with st.sidebar.expander("📚 Reference Levels", expanded=True):
     st.markdown("""
     - 🌳 **Outdoors:** ~10 Bq/m³  
     - ⚠️ **EPA Action Level:** ~148 Bq/m³  
@@ -77,6 +72,10 @@ with st.sidebar.expander("📚 Reference Levels"):
     - 🏠 **Stanley Watras’ Basement:** >100,000 Bq/m³  
     - 🧪 **Dark Matter Labs:** <0.001 Bq/m³  
     """)
+
+with st.sidebar.expander("📟 Display Options"):
+    show_po218 = st.checkbox("Show Po218", value=False)
+    show_po214 = st.checkbox("Show Po214", value=False)
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**Author:** Robert Renz Marcelo Gregorio  \n**Email:** rob@durridge.co.uk  \n**Year:** 2025  \n**Version:** Proof of Concept")
