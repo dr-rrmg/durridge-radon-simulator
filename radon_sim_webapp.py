@@ -39,33 +39,47 @@ def RAD7_CONC_TO_N(ConcBq, decay_const):
 
 # --- Streamlit UI ---
 st.set_page_config(page_title="DURRIDGE Radon Measurement Simulator", layout="wide")
-st.title("DURRIDGE Radon Measurement Simulator - Alpha Version")
+st.title("DURRIDGE Radon Measurement Simulator - Proof of Concept")
 
-st.sidebar.header("Radon Sample Measured")
-Rn222_CONC = st.sidebar.number_input("Rn 222 (Bq/m³)", min_value=0, value=200)
-source = st.sidebar.radio("Constant Radon Source", ["On", "Off"]) == "On"
+# --- Sidebar Sections ---
+
+with st.sidebar.expander("🎯 Measurement Protocol"):
+    protocols = {
+        "Sniff (3hr, 5min cycles)": {"cycle": 5, "time": 180, "mode": "Sniff"},
+        "1-day (30min cycles)": {"cycle": 30, "time": 1440, "mode": "Auto"},
+        "2-day (1hr cycles)": {"cycle": 60, "time": 2880, "mode": "Auto"},
+        "Weeks (2hr cycles)": {"cycle": 120, "time": 10080, "mode": "Auto"}
+    }
+    selected_preset = st.selectbox("Select Protocol", list(protocols.keys()))
+    preset = protocols[selected_preset]
+    cycle_time = preset["cycle"] * 60
+    simtime = preset["time"] * 60
+    mode = preset["mode"]
+    st.markdown(f"""
+    **Cycle Time:** {preset['cycle']} min  
+    **Duration:** {preset['time']} min  
+    **Mode:** {preset['mode']}
+    """)
+
+with st.sidebar.expander("⚛️ Radon Sample"):
+    Rn222_CONC = st.number_input("Rn 222 (Bq/m³)", min_value=0, value=200)
+    source = st.radio("Constant Source", ["On", "Off"]) == "On"
+
+with st.sidebar.expander("📟 Display Options"):
+    show_po218 = st.checkbox("Show Po218", value=False)
+    show_po214 = st.checkbox("Show Po214", value=False)
+
+with st.sidebar.expander("📚 Reference Levels"):
+    st.markdown("""
+    - 🌳 **Outdoors:** ~10 Bq/m³  
+    - ⚠️ **EPA Action Level:** ~148 Bq/m³  
+    - ⛏️ **Uranium Mines:** >10,000 Bq/m³  
+    - 🏠 **Stanley Watras’ Basement:** >100,000 Bq/m³  
+    - 🧪 **Dark Matter Labs:** <0.001 Bq/m³  
+    """)
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("Reference Levels")
-st.sidebar.markdown("""
-- 🌳 **Outdoors:** ~10 Bq/m³  
-- ⚠️ **EPA Action Level:** ~148 Bq/m³ (≈4 pCi/L)  
-- ⛏️ **Uranium Mines:** >10,000 Bq/m³  
-- 🏠 **Stanley Watras’ Basement:** >100,000 Bq/m³  
-- 🧪 **Dark Matter Labs:** <0.001 Bq/m³  
-""")
-
-st.sidebar.header("RAD Measurement Protocol")
-cycle_time = st.sidebar.number_input("Cycle Time (min)", min_value=1, value=15) * 60
-simtime = st.sidebar.number_input("Measurement Time (min)", min_value=1, value=180) * 60
-mode = st.sidebar.radio("Mode", ["Sniff", "Normal", "Auto"])
-
-st.sidebar.header("Simulated Progeny Counts")
-show_po218 = st.sidebar.checkbox("Show Po218", value=False)
-show_po214 = st.sidebar.checkbox("Show Po214", value=False)
-
-st.sidebar.markdown("---")
-st.sidebar.markdown("**Author:** Robert Renz Marcelo Gregorio  \n**Email:** rob@durridge.co.uk  \n**Year:** 2025 Version: Alpha")
+st.sidebar.markdown("**Author:** Robert Renz Marcelo Gregorio  \n**Email:** rob@durridge.co.uk  \n**Year:** 2025  \n**Version:** Proof of Concept")
 
 # --- Simulation ---
 Rn222 = RAD7_CONC_TO_N(Rn222_CONC, dconst['Rn222'])
