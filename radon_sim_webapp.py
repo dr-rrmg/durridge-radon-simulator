@@ -46,10 +46,10 @@ with st.sidebar.expander("⚛️ Radon Sample", expanded=True):
 
 with st.sidebar.expander("🎯 Measurement Protocol", expanded=True):
     protocols = {
-        "Sniff (3hr, 5min cycles)": {"cycle": 5, "time": 180, "mode": "Sniff"},
-        "1-day (30min cycles)": {"cycle": 30, "time": 1440, "mode": "Auto"},
-        "2-day (1hr cycles)": {"cycle": 60, "time": 2880, "mode": "Auto"},
-        "Weeks (2hr cycles)": {"cycle": 120, "time": 10080, "mode": "Auto"}
+        "Sniff": {"cycle": 5, "time": 180, "mode": "Sniff"},
+        "1-day": {"cycle": 30, "time": 1440, "mode": "Auto"},
+        "2-day": {"cycle": 60, "time": 2880, "mode": "Auto"},
+        "Weeks": {"cycle": 120, "time": 10080, "mode": "Auto"}
     }
 
     selected_preset = st.selectbox("Select Protocol", list(protocols.keys()))
@@ -156,7 +156,7 @@ po_conc_df = pd.DataFrame(po_conc_log, columns=['time', 'Po218', 'Po214'])
 po_conc_df['time'] /= 60
 
 # --- Plot ---
-fig, ax = plt.subplots(figsize=(18, 6))  # Wider plot for browser
+fig, ax = plt.subplots(figsize=(10, 5))  # Wider plot for browser
 if show_po218:
     ax.plot(po_conc_df['time'], po_conc_df['Po218'] * dconst['Po218'] / VOLUME,
             label='Po218', linestyle=':', marker='.', markersize=3, alpha=0.6, color='#D62728')
