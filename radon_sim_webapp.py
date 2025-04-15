@@ -37,15 +37,13 @@ def ProgenyDecay(thalf, Ni, dt, method='binomial'):
 def RAD7_CONC_TO_N(ConcBq, decay_const):
     return int(VOLUME * ConcBq / decay_const)
 
-
 # --- Sidebar Sections ---
 st.sidebar.markdown("**DURRIDGE Radon Measurement Simulator (Experimental Code Ver.)**")
-
 
 with st.sidebar.expander("⚛️ Radon Sample", expanded=True):
     Rn222_CONC = st.number_input("Rn 222 (Bq/m³)", min_value=0, value=200)
     source = st.radio("Constant Source", ["On", "Off"]) == "On"
-    
+
 with st.sidebar.expander("🎯 Measurement Protocol", expanded=True):
     protocols = {
         "Sniff (3hr, 5min cycles)": {"cycle": 5, "time": 180, "mode": "Sniff"},
@@ -53,18 +51,28 @@ with st.sidebar.expander("🎯 Measurement Protocol", expanded=True):
         "2-day (1hr cycles)": {"cycle": 60, "time": 2880, "mode": "Auto"},
         "Weeks (2hr cycles)": {"cycle": 120, "time": 10080, "mode": "Auto"}
     }
+
     selected_preset = st.selectbox("Select Protocol", list(protocols.keys()))
     preset = protocols[selected_preset]
-    cycle_time = preset["cycle"] * 60
-    simtime = preset["time"] * 60
-    mode = preset["mode"]
+
+    use_custom = st.checkbox("✏️ Customise protocol manually")
+
+    if use_custom:
+        cycle_time = st.number_input("Cycle Time (min)", min_value=1, value=preset["cycle"]) * 60
+        simtime = st.number_input("Measurement Duration (min)", min_value=1, value=preset["time"]) * 60
+        mode = st.radio("Mode", ["Sniff", "Normal", "Auto"], index=["Sniff", "Normal", "Auto"].index(preset["mode"]))
+    else:
+        cycle_time = preset["cycle"] * 60
+        simtime = preset["time"] * 60
+        mode = preset["mode"]
+
     st.markdown(f"""
-    **Cycle Time:** {preset['cycle']} min  
-    **Duration:** {preset['time']} min  
-    **Mode:** {preset['mode']}
+    **Cycle Time:** {cycle_time // 60:.0f} min  
+    **Duration:** {simtime // 60:.0f} min  
+    **Mode:** {mode}
     """)
 
-with st.sidebar.expander("📚 Reference Levels", expanded=True):
+with st.sidebar.expander("📚 Reference Levels", expanded=False):
     st.markdown("""
     - 🌳 **Outdoors:** ~10 Bq/m³  
     - ⚠️ **EPA Action Level:** ~148 Bq/m³  
@@ -79,7 +87,6 @@ with st.sidebar.expander("📟 Display Options"):
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**Author:** Robert Renz Marcelo Gregorio  \n**Email:** rob@durridge.co.uk  \n**Year:** 2025  \n**Version:** Experimental Code")
-
 
 # --- Simulation ---
 Rn222 = RAD7_CONC_TO_N(Rn222_CONC, dconst['Rn222'])
@@ -149,7 +156,7 @@ po_conc_df = pd.DataFrame(po_conc_log, columns=['time', 'Po218', 'Po214'])
 po_conc_df['time'] /= 60
 
 # --- Plot ---
-fig, ax = plt.subplots(figsize=(10, 5))
+fig, ax = plt.subplots(figsize=(18, 6))  # Wider plot for browser
 if show_po218:
     ax.plot(po_conc_df['time'], po_conc_df['Po218'] * dconst['Po218'] / VOLUME,
             label='Po218', linestyle=':', marker='.', markersize=3, alpha=0.6, color='#D62728')
