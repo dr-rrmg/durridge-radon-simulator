@@ -37,11 +37,12 @@ def ProgenyDecay(thalf, Ni, dt, method='binomial'):
 def RAD7_CONC_TO_N(ConcBq, decay_const):
     return int(VOLUME * ConcBq / decay_const)
 
-# --- Streamlit UI ---
-st.set_page_config(page_title="DURRIDGE Radon Measurement Simulator", layout="wide")
-st.title("DURRIDGE Radon Measurement Simulator (Experimental Code Ver.)")
 
 # --- Sidebar Sections ---
+st.sidebar.markdown("DURRIDGE Radon Measurement Simulator (Experimental Code Ver.)")
+st.sidebar.markdown("**Author:** Robert Renz Marcelo Gregorio  \n**Email:** rob@durridge.co.uk  \n**Year:** 2025  \n**Version:** Experimental Code")
+st.sidebar.markdown("---")
+
 with st.sidebar.expander("⚛️ Radon Sample", expanded=True):
     Rn222_CONC = st.number_input("Rn 222 (Bq/m³)", min_value=0, value=200)
     source = st.radio("Constant Source", ["On", "Off"]) == "On"
@@ -77,8 +78,6 @@ with st.sidebar.expander("📟 Display Options"):
     show_po218 = st.checkbox("Show Po218", value=False)
     show_po214 = st.checkbox("Show Po214", value=False)
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("**Author:** Robert Renz Marcelo Gregorio  \n**Email:** rob@durridge.co.uk  \n**Year:** 2025  \n**Version:** Proof of Concept")
 
 # --- Simulation ---
 Rn222 = RAD7_CONC_TO_N(Rn222_CONC, dconst['Rn222'])
