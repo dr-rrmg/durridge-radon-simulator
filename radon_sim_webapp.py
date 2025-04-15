@@ -55,13 +55,10 @@ st.sidebar.markdown("""
 - 🧪 **Dark Matter Labs:** <0.001 Bq/m³  
 """)
 
-
 st.sidebar.header("RAD Measurement Protocol")
 cycle_time = st.sidebar.number_input("Cycle Time (min)", min_value=1, value=15) * 60
 simtime = st.sidebar.number_input("Measurement Time (min)", min_value=1, value=180) * 60
-mode = st.sidebar.radio("Mode", ["Sniff", "Normal"])
-
-
+mode = st.sidebar.radio("Mode", ["Sniff", "Normal", "Auto"])
 
 st.sidebar.header("Simulated Progeny Counts")
 show_po218 = st.sidebar.checkbox("Show Po218", value=False)
@@ -69,7 +66,6 @@ show_po214 = st.sidebar.checkbox("Show Po214", value=False)
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**Author:** Robert Renz Marcelo Gregorio  \n**Email:** rob@durridge.co.uk  \n**Year:** 2025 Version: Alpha")
-
 
 # --- Simulation ---
 Rn222 = RAD7_CONC_TO_N(Rn222_CONC, dconst['Rn222'])
@@ -110,15 +106,25 @@ for time in range(0, int(simtime), dt):
         mins = time // 60
         cpm_po218 = po218_cycle / (cycle_time / 60)
         cpm_po214 = po214_cycle / (cycle_time / 60)
+
+        radon_sniff = cpm_po218 / (sniff_sens * fudge_factor)
+        radon_sniff_err = 2 * (1 + np.sqrt(po218_cycle + 1)) / ((sniff_sens * fudge_factor) * (cycle_time / 60))
+
+        radon_normal = (cpm_po218 + cpm_po214) / (normal_sens * fudge_factor)
+        radon_normal_err = 2 * (1 + np.sqrt(po218_cycle + po214_cycle + 1)) / (normal_sens * fudge_factor * (cycle_time / 60))
+
         po_cycle_table.append({
             'Cycle Time (min)': mins,
             'Po218 CPM': cpm_po218,
             'Po214 CPM': cpm_po214,
-            'Radon Normal': (cpm_po218 + cpm_po214) / (normal_sens * fudge_factor),
-            'Radon Sniff': cpm_po218 / (sniff_sens * fudge_factor),
-            'Radon Normal ±2σ': 2 * (1 + np.sqrt(po218_cycle + po214_cycle + 1)) / (normal_sens * fudge_factor * (cycle_time / 60)),
-            'Radon Sniff ±2σ': 2 * (1 + np.sqrt(po218_cycle + 1)) / ((sniff_sens * fudge_factor) * (cycle_time / 60))
+            'Radon Normal': radon_normal,
+            'Radon Sniff': radon_sniff,
+            'Radon Normal ±2σ': radon_normal_err,
+            'Radon Sniff ±2σ': radon_sniff_err,
+            'Radon Auto': radon_sniff if time <= 10800 else radon_normal,
+            'Radon Auto ±2σ': radon_sniff_err if time <= 10800 else radon_normal_err
         })
+
         po218_cycle = 0
         po214_cycle = 0
 
@@ -143,6 +149,9 @@ if mode == 'Normal':
 elif mode == 'Sniff':
     y = po_df['Radon Sniff']
     yerr = po_df['Radon Sniff ±2σ']
+elif mode == 'Auto':
+    y = po_df['Radon Auto']
+    yerr = po_df['Radon Auto ±2σ']
 else:
     y = yerr = None
 
@@ -157,4 +166,3 @@ ax.set_xlim(left=0)
 ax.set_ylim(bottom=0)
 ax.legend()
 st.pyplot(fig)
-
