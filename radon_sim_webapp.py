@@ -72,7 +72,7 @@ with st.sidebar.expander("🎯 Measurement Protocol", expanded=True):
     **Mode:** {mode}
     """)
 
-with st.sidebar.expander("📚 Reference Levels", expanded=False):
+with st.sidebar.expander("📚 Reference Levels", expanded=True):
     st.markdown("""
     - 🌳 **Outdoors:** ~10 Bq/m³  
     - ⚠️ **EPA Action Level:** ~148 Bq/m³  
