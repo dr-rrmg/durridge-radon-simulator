@@ -15,27 +15,33 @@ halflives = {
     'Po214': 1.643e-4,
     'Pb210': 7.0325e8
 }
-dconst = {k: np.log(2)/v for k, v in halflives.items()}
+
+dconst = {k: np.log(2) / v for k, v in halflives.items()}
 VOLUME = 1e-3
 dt = 60  # time step in seconds
+
 
 # --- Decay Function Hybrid ---
 def ProgenyDecay(thalf, Ni, dt, method='binomial'):
     tau = thalf / np.log(2)
     p = 1 / tau * dt
+
     if method == 'atom':
         N0 = Ni
         for _ in range(Ni):
             if random.random() < p:
                 Ni -= 1
         return Ni, N0 - Ni
+
     else:
         p = min(1.0, max(0.0, p))
         decays = np.random.binomial(Ni, p)
         return Ni - decays, decays
 
+
 def RAD7_CONC_TO_N(ConcBq, decay_const):
     return int(VOLUME * ConcBq / decay_const)
+
 
 # --- Sidebar Sections ---
 st.sidebar.markdown("**DURRIDGE Radon Measurement Simulator (Experimental Code Ver.)**")
@@ -60,7 +66,11 @@ with st.sidebar.expander("🎯 Measurement Protocol", expanded=True):
     if use_custom:
         cycle_time = st.number_input("Cycle Time (min)", min_value=1, value=preset["cycle"]) * 60
         simtime = st.number_input("Measurement Duration (min)", min_value=1, value=preset["time"]) * 60
-        mode = st.radio("Mode", ["Sniff", "Normal", "Auto"], index=["Sniff", "Normal", "Auto"].index(preset["mode"]))
+        mode = st.radio(
+            "Mode",
+            ["Sniff", "Normal", "Auto"],
+            index=["Sniff", "Normal", "Auto"].index(preset["mode"])
+        )
     else:
         cycle_time = preset["cycle"] * 60
         simtime = preset["time"] * 60
@@ -85,17 +95,33 @@ with st.sidebar.expander("📟 Display Options"):
     show_po218 = st.checkbox("Show Po218", value=False)
     show_po214 = st.checkbox("Show Po214", value=False)
 
+    bar_mode = st.selectbox(
+        "Window Bar Chart",
+        ["Latest Cycle CPM", "Total Counts"]
+    )
+
 st.sidebar.markdown("---")
-st.sidebar.markdown("**Author:** Robert Renz Marcelo Gregorio  \n**Email:** rob@durridge.co.uk  \n**Year:** 2025  \n**Version:** Experimental Code")
+st.sidebar.markdown(
+    "**Author:** Robert Renz Marcelo Gregorio  \n"
+    "**Email:** rob@durridge.co.uk  \n"
+    "**Year:** 2025  \n"
+    "**Version:** Experimental Code"
+)
+
 
 # --- Simulation ---
 Rn222 = RAD7_CONC_TO_N(Rn222_CONC, dconst['Rn222'])
 Po218 = Pb214 = Bi214 = Po214 = Pb210 = 0
+
 dNsim = np.empty((0, 7), dtype=float)
 po_cycle_table = []
 po_conc_log = []
+
 po218_cycle = 0
 po214_cycle = 0
+
+total_po218_counts = 0
+total_po214_counts = 0
 
 normal_sens = 0.014
 sniff_sens = 0.0068
@@ -112,7 +138,19 @@ for time in range(0, int(simtime), dt):
     po218_cycle += Po218_gen
     po214_cycle += Po214_gen
 
-    dNsimdt = np.array([time, Po218_gen / dt, Pb214_gen / dt, Bi214_gen / dt, Po214_gen / dt, Pb210_gen / dt, 0])
+    total_po218_counts += Po218_gen
+    total_po214_counts += Po214_gen
+
+    dNsimdt = np.array([
+        time,
+        Po218_gen / dt,
+        Pb214_gen / dt,
+        Bi214_gen / dt,
+        Po214_gen / dt,
+        Pb210_gen / dt,
+        0
+    ])
+
     dNsim = np.vstack((dNsim, dNsimdt))
     po_conc_log.append([time, Po218, Po214])
 
@@ -125,19 +163,26 @@ for time in range(0, int(simtime), dt):
 
     if time % cycle_time == 0 and time > 0:
         mins = time // 60
+
         cpm_po218 = po218_cycle / (cycle_time / 60)
         cpm_po214 = po214_cycle / (cycle_time / 60)
 
         radon_sniff = cpm_po218 / (sniff_sens * fudge_factor)
-        radon_sniff_err = 2 * (1 + np.sqrt(po218_cycle + 1)) / ((sniff_sens * fudge_factor) * (cycle_time / 60))
+        radon_sniff_err = 2 * (1 + np.sqrt(po218_cycle + 1)) / (
+            (sniff_sens * fudge_factor) * (cycle_time / 60)
+        )
 
         radon_normal = (cpm_po218 + cpm_po214) / (normal_sens * fudge_factor)
-        radon_normal_err = 2 * (1 + np.sqrt(po218_cycle + po214_cycle + 1)) / (normal_sens * fudge_factor * (cycle_time / 60))
+        radon_normal_err = 2 * (1 + np.sqrt(po218_cycle + po214_cycle + 1)) / (
+            normal_sens * fudge_factor * (cycle_time / 60)
+        )
 
         po_cycle_table.append({
             'Cycle Time (min)': mins,
             'Po218 CPM': cpm_po218,
             'Po214 CPM': cpm_po214,
+            'Po218 Counts': po218_cycle,
+            'Po214 Counts': po214_cycle,
             'Radon Normal': radon_normal,
             'Radon Sniff': radon_sniff,
             'Radon Normal ±2σ': radon_normal_err,
@@ -149,36 +194,78 @@ for time in range(0, int(simtime), dt):
         po218_cycle = 0
         po214_cycle = 0
 
-df = pd.DataFrame(dNsim, columns=['time', 'Po218', 'Pb214', 'Bi214', 'Po214', 'Pb210', 'NA'])
+
+# --- DataFrames ---
+df = pd.DataFrame(
+    dNsim,
+    columns=['time', 'Po218', 'Pb214', 'Bi214', 'Po214', 'Pb210', 'NA']
+)
+
 df['time'] /= 60
+
 po_df = pd.DataFrame(po_cycle_table)
-po_conc_df = pd.DataFrame(po_conc_log, columns=['time', 'Po218', 'Po214'])
+
+po_conc_df = pd.DataFrame(
+    po_conc_log,
+    columns=['time', 'Po218', 'Po214']
+)
+
 po_conc_df['time'] /= 60
 
-# --- Plot ---
-fig, ax = plt.subplots()  # Wider plot for browser
+
+# --- Main RAD7 Plot ---
+fig, ax = plt.subplots()
+
 if show_po218:
-    ax.plot(po_conc_df['time'], po_conc_df['Po218'] * dconst['Po218'] / VOLUME,
-            label='Po218', linestyle=':', marker='.', markersize=3, alpha=0.6, color='#D62728')
+    ax.plot(
+        po_conc_df['time'],
+        po_conc_df['Po218'] * dconst['Po218'] / VOLUME,
+        label='Po218',
+        linestyle=':',
+        marker='.',
+        markersize=3,
+        alpha=0.6,
+        color='#D62728'
+    )
+
 if show_po214:
-    ax.plot(df['time'], df['Po214'] / VOLUME,
-            label='Po214', linestyle=':', marker='.', markersize=3, alpha=0.6, color='#1F77B4')
+    ax.plot(
+        po_conc_df['time'],
+        po_conc_df['Po214'] * dconst['Po214'] / VOLUME,
+        label='Po214',
+        linestyle=':',
+        marker='.',
+        markersize=3,
+        alpha=0.6,
+        color='#1F77B4'
+    )
 
-if mode == 'Normal':
-    y = po_df['Radon Normal']
-    yerr = po_df['Radon Normal ±2σ']
-elif mode == 'Sniff':
-    y = po_df['Radon Sniff']
-    yerr = po_df['Radon Sniff ±2σ']
-elif mode == 'Auto':
-    y = po_df['Radon Auto']
-    yerr = po_df['Radon Auto ±2σ']
-else:
-    y = yerr = None
+if not po_df.empty:
+    if mode == 'Normal':
+        y = po_df['Radon Normal']
+        yerr = po_df['Radon Normal ±2σ']
+    elif mode == 'Sniff':
+        y = po_df['Radon Sniff']
+        yerr = po_df['Radon Sniff ±2σ']
+    elif mode == 'Auto':
+        y = po_df['Radon Auto']
+        yerr = po_df['Radon Auto ±2σ']
+    else:
+        y = yerr = None
 
-x = po_df['Cycle Time (min)']
-ax.errorbar(x, y, yerr=yerr, fmt='-o', color='black', ecolor='blue', elinewidth=1, capsize=4,
-            label=f'Radon {mode} Mode')
+    x = po_df['Cycle Time (min)']
+
+    ax.errorbar(
+        x,
+        y,
+        yerr=yerr,
+        fmt='-o',
+        color='black',
+        ecolor='blue',
+        elinewidth=1,
+        capsize=4,
+        label=f'Radon {mode} Mode'
+    )
 
 ax.set_xlabel('Time (Minutes)')
 ax.set_ylabel('Concentration (Bq/m³)')
@@ -186,4 +273,56 @@ ax.grid(True)
 ax.set_xlim(left=0)
 ax.set_ylim(bottom=0)
 ax.legend()
+
 st.pyplot(fig, use_container_width=True)
+
+
+# --- RAD7 Window Bar Chart ---
+st.subheader("RAD7 Window Bar Chart")
+
+if not po_df.empty:
+    if bar_mode == "Latest Cycle CPM":
+        latest_cycle = po_df.iloc[-1]
+
+        window_values = [
+            latest_cycle['Po218 CPM'],
+            latest_cycle['Po214 CPM'],
+            0,
+            0
+        ]
+
+        y_label = "Counts per minute, CPM"
+        title = "Latest Cycle Window Counts"
+
+    else:
+        window_values = [
+            total_po218_counts,
+            total_po214_counts,
+            0,
+            0
+        ]
+
+        y_label = "Total counts"
+        title = "Total Measurement Window Counts"
+
+    window_labels = [
+        "Window A\nPo218",
+        "Window B\nPo214",
+        "Window C",
+        "Window D"
+    ]
+
+    fig_bar, ax_bar = plt.subplots()
+
+    ax_bar.bar(window_labels, window_values)
+
+    ax_bar.set_xlabel("RAD7 Window")
+    ax_bar.set_ylabel(y_label)
+    ax_bar.set_title(title)
+    ax_bar.set_ylim(bottom=0)
+    ax_bar.grid(axis='y', alpha=0.3)
+
+    st.pyplot(fig_bar, use_container_width=True)
+
+else:
+    st.warning("No completed cycles yet. Increase the measurement duration or reduce the cycle time.")
