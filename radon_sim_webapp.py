@@ -289,7 +289,7 @@ if not po_df.empty:
         cpm_c = latest_cycle['Po214 CPM']
         cpm_d = 0
 
-        title = "Latest Cycle Window Counts"
+
 
     else:
         total_minutes = simtime / 60
@@ -299,7 +299,7 @@ if not po_df.empty:
         cpm_c = total_po214_counts / total_minutes
         cpm_d = 0
 
-        title = "Average Window CPM (Entire Measurement)"
+
 
     windows = {
         "A": {"x1": 5.5, "x2": 6.4, "cpm": cpm_a, "label": r"$^{218}$Po"},
@@ -339,7 +339,7 @@ if not po_df.empty:
     ax_bar.set_title(title)
     ax_bar.set_xlim(4.2, 9.3)
     ax_bar.set_ylim(0, 1)
-    ax_bar.set_xlabel("Alpha Energy")
+
     ax_bar.set_yticks([])
 
     ax_bar.set_xticks([5, 6, 7, 8, 9])
