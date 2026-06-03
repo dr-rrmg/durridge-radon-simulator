@@ -336,7 +336,7 @@ if not po_df.empty:
         # Window letters A, B, C, D
         ax_bar.text(
             xmid,
-            0.88,
+            1.2,
             name,
             ha="center",
             va="center",
