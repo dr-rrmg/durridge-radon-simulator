@@ -284,45 +284,69 @@ if not po_df.empty:
     if bar_mode == "Latest Cycle CPM":
         latest_cycle = po_df.iloc[-1]
 
-        window_values = [
-            latest_cycle['Po218 CPM'],
-            0,
-            latest_cycle['Po214 CPM'],
-            0
-        ]
+        cpm_a = latest_cycle['Po218 CPM']
+        cpm_b = 0
+        cpm_c = latest_cycle['Po214 CPM']
+        cpm_d = 0
 
-        y_label = "Counts per minute, CPM"
         title = "Latest Cycle Window Counts"
 
     else:
         total_minutes = simtime / 60
-    
-        window_values = [
-            total_po218_counts / total_minutes,
-            0,
-            total_po214_counts / total_minutes,
-            0
-        ]
-    
-        y_label = "Counts per minute, CPM"
+
+        cpm_a = total_po218_counts / total_minutes
+        cpm_b = 0
+        cpm_c = total_po214_counts / total_minutes
+        cpm_d = 0
+
         title = "Average Window CPM (Entire Measurement)"
 
-    window_labels = [
-        "Window A\nPo218",
-        "Window B",
-        "Window C\nPo214",
-        "Window D"
-    ]
+    windows = {
+        "A": {"x1": 5.5, "x2": 6.4, "cpm": cpm_a, "label": r"$^{218}$Po"},
+        "B": {"x1": 6.8, "x2": 7.2, "cpm": cpm_b, "label": r"$^{216}$Po"},
+        "C": {"x1": 7.6, "x2": 8.3, "cpm": cpm_c, "label": r"$^{214}$Po"},
+        "D": {"x1": 8.6, "x2": 9.0, "cpm": cpm_d, "label": r"$^{212}$Po"},
+    }
 
-    fig_bar, ax_bar = plt.subplots()
+    fig_bar, ax_bar = plt.subplots(figsize=(8, 4))
 
-    ax_bar.bar(window_labels, window_values)
+    # Background vertical stripes
+    for xstripe in np.arange(4.0, 9.3, 0.1):
+        ax_bar.axvspan(xstripe, xstripe + 0.04, color="lightgrey", alpha=0.5, linewidth=0)
 
-    ax_bar.set_xlabel("RAD7 Window")
-    ax_bar.set_ylabel(y_label)
+    # Window regions
+    for name, w in windows.items():
+        colour = "black" if w["cpm"] > 0 else "0.7"
+        ax_bar.axvspan(w["x1"], w["x2"], ymin=0, ymax=0.82, color=colour)
+
+        xmid = (w["x1"] + w["x2"]) / 2
+        ax_bar.text(xmid, 0.88, name, ha="center", va="center",
+                    fontsize=16, fontweight="bold", transform=ax_bar.get_xaxis_transform())
+
+        ax_bar.text(xmid, 1.03, w["label"], ha="center", va="bottom",
+                    fontsize=14, transform=ax_bar.get_xaxis_transform())
+
+        ax_bar.text(xmid, -0.13, f"{w['cpm']:.3g}", ha="center", va="top",
+                    fontsize=12, transform=ax_bar.get_xaxis_transform())
+
+    # Extra isotope label at left
+    ax_bar.text(4.7, 1.03, r"$^{210}$Po", ha="center", va="bottom",
+                fontsize=14, transform=ax_bar.get_xaxis_transform())
+
+    ax_bar.text(4.25, -0.13, "CPM:", ha="right", va="top",
+                fontsize=12, transform=ax_bar.get_xaxis_transform())
+
     ax_bar.set_title(title)
-    ax_bar.set_ylim(bottom=0)
-    ax_bar.grid(axis='y', alpha=0.3)
+    ax_bar.set_xlim(4.2, 9.3)
+    ax_bar.set_ylim(0, 1)
+    ax_bar.set_xlabel("Alpha Energy")
+    ax_bar.set_yticks([])
+
+    ax_bar.set_xticks([5, 6, 7, 8, 9])
+    ax_bar.set_xticklabels(["5MeV", "6MeV", "7MeV", "8MeV", "9MeV"])
+
+    ax_bar.tick_params(axis='x', length=8)
+    ax_bar.grid(False)
 
     st.pyplot(fig_bar, use_container_width=True)
 
