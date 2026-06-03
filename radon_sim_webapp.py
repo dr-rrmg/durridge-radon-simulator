@@ -215,7 +215,6 @@ po_conc_df['time'] /= 60
 
 # --- Main RAD7 Plot ---
 fig, ax = plt.subplots()
-
 if show_po218:
     ax.plot(
         po_conc_df['time'],
@@ -230,8 +229,8 @@ if show_po218:
 
 if show_po214:
     ax.plot(
-        po_conc_df['time'],
-        po_conc_df['Po214'] * dconst['Po214'] / VOLUME,
+        df['time'],
+        df['Po214'] / VOLUME,
         label='Po214',
         linestyle=':',
         marker='.',
