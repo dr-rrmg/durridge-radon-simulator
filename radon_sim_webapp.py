@@ -97,7 +97,7 @@ with st.sidebar.expander("📟 Display Options"):
 
     bar_mode = st.selectbox(
         "Window Bar Chart",
-        ["Latest Cycle CPM", "Total Counts"]
+        ["Latest Cycle CPM", "Total Measurement"]
     )
 
 st.sidebar.markdown("---")
