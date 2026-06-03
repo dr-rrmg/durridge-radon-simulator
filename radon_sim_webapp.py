@@ -336,7 +336,7 @@ if not po_df.empty:
     ax_bar.text(4.25, -0.13, "CPM:", ha="right", va="top",
                 fontsize=12, transform=ax_bar.get_xaxis_transform())
 
-    ax_bar.set_title(title)
+
     ax_bar.set_xlim(4.2, 9.3)
     ax_bar.set_ylim(0, 1)
 
