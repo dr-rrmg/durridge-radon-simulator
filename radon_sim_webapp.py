@@ -286,8 +286,8 @@ if not po_df.empty:
 
         window_values = [
             latest_cycle['Po218 CPM'],
-            latest_cycle['Po214 CPM'],
             0,
+            latest_cycle['Po214 CPM'],
             0
         ]
 
@@ -295,20 +295,22 @@ if not po_df.empty:
         title = "Latest Cycle Window Counts"
 
     else:
+        total_minutes = simtime / 60
+    
         window_values = [
-            total_po218_counts,
-            total_po214_counts,
+            total_po218_counts / total_minutes,
             0,
+            total_po214_counts / total_minutes,
             0
         ]
-
-        y_label = "Total counts"
-        title = "Total Measurement Window Counts"
+    
+        y_label = "Counts per minute, CPM"
+        title = "Average Window CPM (Entire Measurement)"
 
     window_labels = [
         "Window A\nPo218",
-        "Window B\nPo214",
-        "Window C",
+        "Window B",
+        "Window C\nPo214",
         "Window D"
     ]
 
