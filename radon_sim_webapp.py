@@ -289,8 +289,6 @@ if not po_df.empty:
         cpm_c = latest_cycle['Po214 CPM']
         cpm_d = 0
 
-
-
     else:
         total_minutes = simtime / 60
 
@@ -298,8 +296,6 @@ if not po_df.empty:
         cpm_b = 0
         cpm_c = total_po214_counts / total_minutes
         cpm_d = 0
-
-
 
     windows = {
         "A": {"x1": 5.5, "x2": 6.4, "cpm": cpm_a, "label": r"$^{218}$Po"},
@@ -312,33 +308,89 @@ if not po_df.empty:
 
     # Background vertical stripes
     for xstripe in np.arange(4.0, 9.3, 0.1):
-        ax_bar.axvspan(xstripe, xstripe + 0.04, color="lightgrey", alpha=0.5, linewidth=0)
+        ax_bar.axvspan(
+            xstripe,
+            xstripe + 0.04,
+            color="lightgrey",
+            alpha=0.5,
+            linewidth=0
+        )
 
-    # Window regions
+    # Scale peak heights by CPM
+    max_cpm = max(cpm_a, cpm_b, cpm_c, cpm_d, 1)
+
     for name, w in windows.items():
-        colour = "black" if w["cpm"] > 0 else "0.7"
-        ax_bar.axvspan(w["x1"], w["x2"], ymin=0, ymax=0.82, color=colour)
-
         xmid = (w["x1"] + w["x2"]) / 2
-        ax_bar.text(xmid, 0.88, name, ha="center", va="center",
-                    fontsize=16, fontweight="bold", transform=ax_bar.get_xaxis_transform())
+        width = w["x2"] - w["x1"]
+        height = w["cpm"] / max_cpm
 
-        ax_bar.text(xmid, 1.03, w["label"], ha="center", va="bottom",
-                    fontsize=14, transform=ax_bar.get_xaxis_transform())
+        # Only draw black bars where CPM > 0
+        if w["cpm"] > 0:
+            ax_bar.bar(
+                xmid,
+                height,
+                width=width,
+                color="black",
+                align="center"
+            )
 
-        ax_bar.text(xmid, -0.13, f"{w['cpm']:.3g}", ha="center", va="top",
-                    fontsize=12, transform=ax_bar.get_xaxis_transform())
+        # Window letters A, B, C, D
+        ax_bar.text(
+            xmid,
+            0.88,
+            name,
+            ha="center",
+            va="center",
+            fontsize=16,
+            fontweight="bold",
+            transform=ax_bar.get_xaxis_transform()
+        )
+
+        # Isotope labels
+        ax_bar.text(
+            xmid,
+            1.03,
+            w["label"],
+            ha="center",
+            va="bottom",
+            fontsize=14,
+            transform=ax_bar.get_xaxis_transform()
+        )
+
+        # CPM values under axis
+        ax_bar.text(
+            xmid,
+            -0.13,
+            f"{w['cpm']:.3g}",
+            ha="center",
+            va="top",
+            fontsize=12,
+            transform=ax_bar.get_xaxis_transform()
+        )
 
     # Extra isotope label at left
-    ax_bar.text(4.7, 1.03, r"$^{210}$Po", ha="center", va="bottom",
-                fontsize=14, transform=ax_bar.get_xaxis_transform())
+    ax_bar.text(
+        4.7,
+        1.03,
+        r"$^{210}$Po",
+        ha="center",
+        va="bottom",
+        fontsize=14,
+        transform=ax_bar.get_xaxis_transform()
+    )
 
-    ax_bar.text(4.25, -0.13, "CPM:", ha="right", va="top",
-                fontsize=12, transform=ax_bar.get_xaxis_transform())
-
+    ax_bar.text(
+        4.25,
+        -0.13,
+        "CPM:",
+        ha="right",
+        va="top",
+        fontsize=12,
+        transform=ax_bar.get_xaxis_transform()
+    )
 
     ax_bar.set_xlim(4.2, 9.3)
-    ax_bar.set_ylim(0, 1)
+    ax_bar.set_ylim(0, 1.05)
 
     ax_bar.set_yticks([])
 
